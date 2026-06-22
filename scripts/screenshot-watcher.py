@@ -78,6 +78,7 @@ def upload(path: Path) -> str:
         headers={
             "Authorization": f"Bearer {TOKEN}",
             "Content-Type": content_type_header,
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) media-app-uploader",
         },
     )
     with urllib.request.urlopen(request, timeout=120) as response:
@@ -105,6 +106,8 @@ def main() -> None:
         sys.exit(1)
 
     uploaded = load_uploaded()
+    failed: dict[str, float] = {}
+    retry_backoff_seconds = 30
     print(f"Watching {WATCH_DIR} for new screenshots...")
 
     while True:
@@ -117,14 +120,19 @@ def main() -> None:
             ):
                 continue
 
+            if key in failed and time.time() - failed[key] < retry_backoff_seconds:
+                continue
+
             wait_until_stable(path)
             try:
                 url = upload(path)
             except (urllib.error.URLError, urllib.error.HTTPError, OSError) as exc:
                 print(f"Failed to upload {path}: {exc}", file=sys.stderr)
+                failed[key] = time.time()
                 continue
 
             uploaded.add(key)
+            failed.pop(key, None)
             save_uploaded(uploaded)
             copy_to_clipboard(url)
             notify("Screenshot uploaded", url)
