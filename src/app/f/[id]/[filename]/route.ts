@@ -10,8 +10,14 @@ export async function GET(
   const userAgent = request.headers.get("user-agent") ?? "";
 
   if (!LINK_PREVIEW_BOTS.test(userAgent)) {
-    return Response.redirect(new URL(`/p/${id}`, process.env.PUBLIC_APP_URL), 302);
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: new URL(`/p/${id}`, process.env.PUBLIC_APP_URL).toString(),
+        "Cache-Control": "private, no-store",
+      },
+    });
   }
 
-  return serveMediaFile(request, id);
+  return serveMediaFile(request, id, { cacheable: false });
 }

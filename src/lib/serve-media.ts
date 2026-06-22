@@ -12,7 +12,12 @@ function contentDispositionHeader(filename: string) {
   return `inline; filename="${safeAscii}"; filename*=UTF-8''${encoded}`;
 }
 
-export async function serveMediaFile(request: Request, id: string): Promise<Response> {
+export async function serveMediaFile(
+  request: Request,
+  id: string,
+  options: { cacheable?: boolean } = {},
+): Promise<Response> {
+  const cacheable = options.cacheable ?? true;
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("media")
@@ -34,7 +39,9 @@ export async function serveMediaFile(request: Request, id: string): Promise<Resp
   const headers = new Headers({
     "Content-Type": data.mime_type,
     "Content-Disposition": contentDispositionHeader(data.original_filename),
-    "Cache-Control": "public, max-age=31536000, immutable",
+    "Cache-Control": cacheable
+      ? "public, max-age=31536000, immutable"
+      : "private, no-store",
     "Accept-Ranges": "bytes",
   });
 
