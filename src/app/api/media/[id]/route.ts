@@ -56,6 +56,7 @@ export async function PATCH(
   if ("note" in body) updates.note = typeof body.note === "string" ? body.note : null;
   if ("featured" in body) updates.featured = Boolean(body.featured);
   if ("title" in body) updates.title = typeof body.title === "string" ? body.title : null;
+  if ("collection_id" in body) updates.collection_id = typeof body.collection_id === "string" ? body.collection_id : null;
 
   const admin = createAdminClient();
   const { data, error } = await admin

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Link2, Check, Film, Trash2, Pencil, Save, X, Star } from "lucide-react";
 import type { MediaItem } from "@/lib/get-media";
+import type { Collection } from "@/lib/collections";
 
 function formatSize(bytes: number) {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
@@ -17,7 +18,7 @@ function toDatetimeLocalValue(iso: string | null) {
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 }
 
-function GalleryCard({ item }: { item: MediaItem }) {
+function GalleryCard({ item, collections }: { item: MediaItem; collections: Collection[] }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -27,6 +28,7 @@ function GalleryCard({ item }: { item: MediaItem }) {
   const [capturedAt, setCapturedAt] = useState(toDatetimeLocalValue(item.captured_at));
   const [note, setNote] = useState(item.note ?? "");
   const [title, setTitle] = useState(item.title ?? "");
+  const [collectionId, setCollectionId] = useState(item.collection_id ?? "");
   const [featured, setFeatured] = useState(item.featured);
   const [togglingFeatured, setTogglingFeatured] = useState(false);
   const isVideo = item.mime_type.startsWith("video/");
@@ -72,6 +74,7 @@ function GalleryCard({ item }: { item: MediaItem }) {
         captured_at: capturedAt ? new Date(capturedAt).toISOString() : null,
         note: note || null,
         title: title || null,
+        collection_id: collectionId || null,
       }),
     });
     setSaving(false);
@@ -169,6 +172,21 @@ function GalleryCard({ item }: { item: MediaItem }) {
             />
           </label>
           <label className="flex flex-col gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+            Folder
+            <select
+              value={collectionId}
+              onChange={(e) => setCollectionId(e.target.value)}
+              className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-sm text-zinc-950 outline-none focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
+            >
+              <option value="">No folder</option>
+              {collections.map((collection) => (
+                <option key={collection.id} value={collection.id}>
+                  {collection.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs text-zinc-500 dark:text-zinc-400">
             Taken
             <input
               type="datetime-local"
@@ -209,7 +227,13 @@ function GalleryCard({ item }: { item: MediaItem }) {
   );
 }
 
-export function Gallery({ items }: { items: MediaItem[] }) {
+export function Gallery({
+  items,
+  collections,
+}: {
+  items: MediaItem[];
+  collections: Collection[];
+}) {
   if (items.length === 0) {
     return (
       <p className="text-sm text-zinc-500 dark:text-zinc-400">
@@ -221,7 +245,7 @@ export function Gallery({ items }: { items: MediaItem[] }) {
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
       {items.map((item) => (
-        <GalleryCard key={item.id} item={item} />
+        <GalleryCard key={item.id} item={item} collections={collections} />
       ))}
     </div>
   );

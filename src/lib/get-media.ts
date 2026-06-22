@@ -11,10 +11,11 @@ export type MediaItem = {
   note: string | null;
   featured: boolean;
   title: string | null;
+  collection_id: string | null;
 };
 
 const SELECT_FIELDS =
-  "id, original_filename, mime_type, size_bytes, created_at, captured_at, note, featured, title";
+  "id, original_filename, mime_type, size_bytes, created_at, captured_at, note, featured, title, collection_id";
 
 export async function getMediaForUser(userId: string): Promise<MediaItem[]> {
   const admin = createAdminClient();

@@ -32,7 +32,7 @@ export async function generateMetadata(
     openGraph: isVideo
       ? {
           title: displayTitle,
-          videos: [{ url: fileUrl, type: item.mime_type }],
+          videos: [{ url: fileUrl, type: item.mime_type, width: 1280, height: 720 }],
         }
       : {
           title: displayTitle,
