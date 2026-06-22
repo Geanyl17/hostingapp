@@ -14,6 +14,8 @@ export const ALLOWED_MIME_TYPES: Record<string, string> = {
 
 export const MAX_UPLOAD_BYTES = 500 * 1024 * 1024;
 
+export const RETENTION_DAYS = 15;
+
 export function uploadRoot() {
   return path.resolve(
     /* turbopackIgnore: true */ process.cwd(),
