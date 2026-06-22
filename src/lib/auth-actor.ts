@@ -1,8 +1,16 @@
 import "server-only";
+import { timingSafeEqual } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 let cachedOwnerId: string | null = null;
+
+function tokensMatch(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
 
 async function getOwnerUserId(): Promise<string | null> {
   if (cachedOwnerId) return cachedOwnerId;
@@ -23,7 +31,8 @@ export async function resolveUploadActorUserId(
     ? authHeader.slice("Bearer ".length)
     : null;
 
-  if (token && token === process.env.API_UPLOAD_TOKEN) {
+  const expectedToken = process.env.API_UPLOAD_TOKEN;
+  if (token && expectedToken && tokensMatch(token, expectedToken)) {
     return getOwnerUserId();
   }
 

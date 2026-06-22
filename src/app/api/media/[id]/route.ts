@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { uploadRoot } from "@/lib/media";
+import { clampString, PayloadTooLargeError, readJsonBody } from "@/lib/request-guards";
 
 export async function DELETE(
   _request: Request,
@@ -50,12 +51,21 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
+  let body: Record<string, unknown>;
+  try {
+    body = (await readJsonBody(request)) as Record<string, unknown>;
+  } catch (err) {
+    if (err instanceof PayloadTooLargeError) {
+      return NextResponse.json({ error: "Request body too large" }, { status: 413 });
+    }
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
   const updates: Record<string, string | boolean | null> = {};
   if ("captured_at" in body) updates.captured_at = typeof body.captured_at === "string" ? body.captured_at : null;
-  if ("note" in body) updates.note = typeof body.note === "string" ? body.note : null;
+  if ("note" in body) updates.note = typeof body.note === "string" ? clampString(body.note, 2000) : null;
   if ("featured" in body) updates.featured = Boolean(body.featured);
-  if ("title" in body) updates.title = typeof body.title === "string" ? body.title : null;
+  if ("title" in body) updates.title = typeof body.title === "string" ? clampString(body.title, 200) : null;
   if ("collection_id" in body) updates.collection_id = typeof body.collection_id === "string" ? body.collection_id : null;
 
   const admin = createAdminClient();

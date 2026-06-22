@@ -6,6 +6,12 @@ import { Readable } from "node:stream";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { uploadRoot } from "@/lib/media";
 
+function contentDispositionHeader(filename: string) {
+  const safeAscii = filename.replace(/[^\x20-\x7e]/g, "_").replace(/"/g, "'");
+  const encoded = encodeURIComponent(filename);
+  return `inline; filename="${safeAscii}"; filename*=UTF-8''${encoded}`;
+}
+
 export async function serveMediaFile(request: Request, id: string): Promise<Response> {
   const admin = createAdminClient();
   const { data, error } = await admin
@@ -27,7 +33,7 @@ export async function serveMediaFile(request: Request, id: string): Promise<Resp
   const range = request.headers.get("range");
   const headers = new Headers({
     "Content-Type": data.mime_type,
-    "Content-Disposition": `inline; filename="${data.original_filename}"`,
+    "Content-Disposition": contentDispositionHeader(data.original_filename),
     "Cache-Control": "public, max-age=31536000, immutable",
     "Accept-Ranges": "bytes",
   });
