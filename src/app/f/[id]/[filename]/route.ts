@@ -10,7 +10,7 @@ export async function GET(
   const userAgent = request.headers.get("user-agent") ?? "";
 
   if (!LINK_PREVIEW_BOTS.test(userAgent)) {
-    return Response.redirect(new URL(`/p/${id}`, request.url), 302);
+    return Response.redirect(new URL(`/p/${id}`, process.env.PUBLIC_APP_URL), 302);
   }
 
   return serveMediaFile(request, id);
