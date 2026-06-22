@@ -26,6 +26,7 @@ function GalleryCard({ item }: { item: MediaItem }) {
   const [saving, setSaving] = useState(false);
   const [capturedAt, setCapturedAt] = useState(toDatetimeLocalValue(item.captured_at));
   const [note, setNote] = useState(item.note ?? "");
+  const [title, setTitle] = useState(item.title ?? "");
   const [featured, setFeatured] = useState(item.featured);
   const [togglingFeatured, setTogglingFeatured] = useState(false);
   const isVideo = item.mime_type.startsWith("video/");
@@ -70,6 +71,7 @@ function GalleryCard({ item }: { item: MediaItem }) {
       body: JSON.stringify({
         captured_at: capturedAt ? new Date(capturedAt).toISOString() : null,
         note: note || null,
+        title: title || null,
       }),
     });
     setSaving(false);
@@ -101,7 +103,7 @@ function GalleryCard({ item }: { item: MediaItem }) {
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 flex-col">
           <span className="truncate text-sm font-medium text-zinc-950 dark:text-zinc-50">
-            {item.original_filename}
+            {item.title || item.original_filename}
           </span>
           <span className="text-xs text-zinc-500 dark:text-zinc-400">
             {formatSize(item.size_bytes)}
@@ -156,6 +158,16 @@ function GalleryCard({ item }: { item: MediaItem }) {
       </div>
       {editing && (
         <div className="flex flex-col gap-2 border-t border-zinc-200 pt-2 dark:border-zinc-800">
+          <label className="flex flex-col gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+            Title
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={item.original_filename}
+              className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-sm text-zinc-950 outline-none focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-50"
+            />
+          </label>
           <label className="flex flex-col gap-1 text-xs text-zinc-500 dark:text-zinc-400">
             Taken
             <input

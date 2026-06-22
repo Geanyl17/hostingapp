@@ -12,7 +12,7 @@ export default async function Home() {
     <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
       <header className="flex items-center justify-between px-6 py-5 sm:px-10">
         <span className="text-sm font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">
-          Geanyl
+          Geanyl Dev Tools
         </span>
         {user ? (
           <Link
@@ -35,10 +35,10 @@ export default async function Home() {
 
       <section className="flex flex-col items-center gap-3 px-6 pt-16 pb-10 text-center sm:pt-24">
         <h1 className="text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl dark:text-zinc-50">
-          Geanyl
+          Welcome to Geanyl&apos;s Hosting Site.
         </h1>
         <p className="text-base text-zinc-500 dark:text-zinc-400">
-          Featured Clips
+          uploads are currently private, but you can view some of the featured media below!
         </p>
       </section>
 
@@ -76,6 +76,13 @@ export default async function Home() {
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90">
                         <Play className="h-4 w-4 fill-current text-zinc-900" />
                       </div>
+                    </div>
+                  )}
+                  {item.title && (
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2">
+                      <span className="truncate text-sm font-medium text-white">
+                        {item.title}
+                      </span>
                     </div>
                   )}
                 </Link>

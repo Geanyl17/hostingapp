@@ -25,16 +25,17 @@ export async function generateMetadata(
 
   const fileUrl = new URL(`/f/${id}`, process.env.PUBLIC_APP_URL).toString();
   const isVideo = item.mime_type.startsWith("video/");
+  const displayTitle = item.title || item.original_filename;
 
   return {
-    title: item.original_filename,
+    title: displayTitle,
     openGraph: isVideo
       ? {
-          title: item.original_filename,
+          title: displayTitle,
           videos: [{ url: fileUrl, type: item.mime_type }],
         }
       : {
-          title: item.original_filename,
+          title: displayTitle,
           images: [{ url: fileUrl }],
         },
   };
@@ -66,7 +67,7 @@ export default async function MediaPage(
       </div>
       <div className="flex w-full flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-4 md:w-72 dark:border-zinc-800 dark:bg-zinc-950">
         <h1 className="truncate text-sm font-semibold text-zinc-950 dark:text-zinc-50">
-          {item.original_filename}
+          {item.title || item.original_filename}
         </h1>
         <div className="flex flex-col gap-3 text-sm text-zinc-600 dark:text-zinc-400">
           <div className="flex items-start gap-2">
