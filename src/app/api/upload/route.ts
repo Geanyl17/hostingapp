@@ -48,6 +48,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const url = new URL(`/f/${id}`, request.url).toString();
+  const url = new URL(`/f/${id}`, process.env.PUBLIC_APP_URL).toString();
   return NextResponse.json({ id, url }, { status: 201 });
 }
