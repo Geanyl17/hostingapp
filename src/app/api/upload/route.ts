@@ -3,7 +3,7 @@ import path from "node:path";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { resolveUploadActorUserId } from "@/lib/auth-actor";
-import { ALLOWED_MIME_TYPES, MAX_UPLOAD_BYTES, buildStoragePath, uploadRoot } from "@/lib/media";
+import { ALLOWED_MIME_TYPES, MAX_UPLOAD_BYTES, buildShareFilename, buildStoragePath, uploadRoot } from "@/lib/media";
 
 export async function POST(request: Request) {
   const userId = await resolveUploadActorUserId(request);
@@ -48,6 +48,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const url = new URL(`/p/${id}`, process.env.PUBLIC_APP_URL).toString();
+  const shareFilename = buildShareFilename(file.name, file.type);
+  const url = new URL(`/f/${id}/${shareFilename}`, process.env.PUBLIC_APP_URL).toString();
   return NextResponse.json({ id, url }, { status: 201 });
 }

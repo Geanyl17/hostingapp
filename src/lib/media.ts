@@ -29,3 +29,14 @@ export function buildStoragePath(userId: string, id: string, ext: string) {
   const month = String(now.getMonth() + 1).padStart(2, "0");
   return path.join(userId, year, month, `${id}${ext}`);
 }
+
+export function buildShareFilename(originalFilename: string, mimeType: string) {
+  const ext = ALLOWED_MIME_TYPES[mimeType] ?? "";
+  const base = originalFilename.replace(/\.[^./]+$/, "");
+  const slug = base
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+  return `${slug || "file"}${ext}`;
+}

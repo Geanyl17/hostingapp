@@ -18,6 +18,28 @@ function toDatetimeLocalValue(iso: string | null) {
   return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 }
 
+const EXT_BY_MIME: Record<string, string> = {
+  "image/png": ".png",
+  "image/jpeg": ".jpg",
+  "image/gif": ".gif",
+  "image/webp": ".webp",
+  "image/avif": ".avif",
+  "video/mp4": ".mp4",
+  "video/webm": ".webm",
+  "video/quicktime": ".mov",
+};
+
+function buildShareFilename(originalFilename: string, mimeType: string) {
+  const ext = EXT_BY_MIME[mimeType] ?? "";
+  const base = originalFilename.replace(/\.[^./]+$/, "");
+  const slug = base
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+  return `${slug || "file"}${ext}`;
+}
+
 function GalleryCard({ item, collections }: { item: MediaItem; collections: Collection[] }) {
   const router = useRouter();
   const [copied, setCopied] = useState(false);
@@ -34,9 +56,10 @@ function GalleryCard({ item, collections }: { item: MediaItem; collections: Coll
   const isVideo = item.mime_type.startsWith("video/");
   const fileUrl = `/f/${item.id}`;
   const pageUrl = `/p/${item.id}`;
+  const shareUrl = `/f/${item.id}/${buildShareFilename(item.original_filename, item.mime_type)}`;
 
   async function copyLink() {
-    const fullUrl = new URL(pageUrl, window.location.origin).toString();
+    const fullUrl = new URL(shareUrl, window.location.origin).toString();
     await navigator.clipboard.writeText(fullUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
