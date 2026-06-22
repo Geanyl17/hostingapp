@@ -1,0 +1,13 @@
+services:
+  media-app:
+    build: .
+    container_name: media-app
+    restart: always
+    env_file: .env.production
+    volumes:
+      - /srv/media-app/uploads:/app/uploads
+
+networks:
+  default:
+    external: true
+    name: shared-edge
