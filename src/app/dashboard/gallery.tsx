@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Link2, Check, Film } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Link2, Check, Film, Trash2 } from "lucide-react";
 import type { MediaItem } from "@/lib/get-media";
 
 function formatSize(bytes: number) {
@@ -10,7 +11,10 @@ function formatSize(bytes: number) {
 }
 
 function GalleryCard({ item }: { item: MediaItem }) {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const isVideo = item.mime_type.startsWith("video/");
   const fileUrl = `/f/${item.id}`;
 
@@ -19,6 +23,17 @@ function GalleryCard({ item }: { item: MediaItem }) {
     await navigator.clipboard.writeText(fullUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  }
+
+  async function deleteItem() {
+    setDeleting(true);
+    const res = await fetch(`/api/media/${item.id}`, { method: "DELETE" });
+    if (res.ok) {
+      router.refresh();
+    } else {
+      setDeleting(false);
+      setConfirmingDelete(false);
+    }
   }
 
   return (
@@ -44,17 +59,35 @@ function GalleryCard({ item }: { item: MediaItem }) {
             {formatSize(item.size_bytes)}
           </span>
         </div>
-        <button
-          onClick={copyLink}
-          className="flex shrink-0 items-center gap-1 rounded-lg border border-zinc-200 px-2 py-1 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
-        >
-          {copied ? (
-            <Check className="h-3.5 w-3.5" />
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            onClick={copyLink}
+            className="flex items-center gap-1 rounded-lg border border-zinc-200 px-2 py-1 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
+          >
+            {copied ? (
+              <Check className="h-3.5 w-3.5" />
+            ) : (
+              <Link2 className="h-3.5 w-3.5" />
+            )}
+          </button>
+          {confirmingDelete ? (
+            <button
+              onClick={deleteItem}
+              disabled={deleting}
+              className="flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-2 py-1 text-xs font-medium text-red-700 transition-colors hover:bg-red-100 disabled:opacity-60 dark:border-red-900 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/70"
+            >
+              {deleting ? "Deleting..." : "Confirm"}
+            </button>
           ) : (
-            <Link2 className="h-3.5 w-3.5" />
+            <button
+              onClick={() => setConfirmingDelete(true)}
+              onBlur={() => setConfirmingDelete(false)}
+              className="flex items-center gap-1 rounded-lg border border-zinc-200 px-2 py-1 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
           )}
-          {copied ? "Copied" : "Copy link"}
-        </button>
+        </div>
       </div>
     </div>
   );
