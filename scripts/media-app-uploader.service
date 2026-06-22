@@ -1,0 +1,12 @@
+[Unit]
+Description=Auto-upload new screenshots to media-app
+
+[Service]
+Type=simple
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=%h/.config/media-app-uploader/env
+ExecStart=/usr/bin/python3 %h/codingprojects/hostingapp/scripts/screenshot-watcher.py
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

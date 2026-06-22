@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local uploaded media (real storage lives on the VPS bind mount)
+/uploads
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

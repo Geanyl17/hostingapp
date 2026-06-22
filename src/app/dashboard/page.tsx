@@ -1,10 +1,14 @@
 import { LayoutDashboard } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { getMediaForUser } from "@/lib/get-media";
 import { LogoutButton } from "./logout-button";
+import { Uploader } from "./uploader";
+import { Gallery } from "./gallery";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  const items = user ? await getMediaForUser(user.id) : [];
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
@@ -22,10 +26,9 @@ export default async function DashboardPage() {
           <LogoutButton />
         </div>
       </header>
-      <main className="flex flex-1 items-center justify-center">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Uploads and gallery coming soon.
-        </p>
+      <main className="flex flex-1 flex-col gap-6 p-6">
+        <Uploader />
+        <Gallery items={items} />
       </main>
     </div>
   );
