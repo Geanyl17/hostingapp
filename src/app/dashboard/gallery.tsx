@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Link2, Check, Film, Trash2, Pencil, Save, X } from "lucide-react";
+import { Link2, Check, Film, Trash2, Pencil, Save, X, Star } from "lucide-react";
 import type { MediaItem } from "@/lib/get-media";
 
 function formatSize(bytes: number) {
@@ -26,6 +26,8 @@ function GalleryCard({ item }: { item: MediaItem }) {
   const [saving, setSaving] = useState(false);
   const [capturedAt, setCapturedAt] = useState(toDatetimeLocalValue(item.captured_at));
   const [note, setNote] = useState(item.note ?? "");
+  const [featured, setFeatured] = useState(item.featured);
+  const [togglingFeatured, setTogglingFeatured] = useState(false);
   const isVideo = item.mime_type.startsWith("video/");
   const fileUrl = `/f/${item.id}`;
   const pageUrl = `/p/${item.id}`;
@@ -46,6 +48,18 @@ function GalleryCard({ item }: { item: MediaItem }) {
       setDeleting(false);
       setConfirmingDelete(false);
     }
+  }
+
+  async function toggleFeatured() {
+    setTogglingFeatured(true);
+    const next = !featured;
+    const res = await fetch(`/api/media/${item.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ featured: next }),
+    });
+    setTogglingFeatured(false);
+    if (res.ok) setFeatured(next);
   }
 
   async function saveDetails() {
@@ -94,6 +108,17 @@ function GalleryCard({ item }: { item: MediaItem }) {
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-1">
+          <button
+            onClick={toggleFeatured}
+            disabled={togglingFeatured}
+            className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-xs font-medium transition-colors disabled:opacity-60 ${
+              featured
+                ? "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-400 dark:hover:bg-amber-950/70"
+                : "border-zinc-200 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            }`}
+          >
+            <Star className={`h-3.5 w-3.5 ${featured ? "fill-current" : ""}`} />
+          </button>
           <button
             onClick={copyLink}
             className="flex items-center gap-1 rounded-lg border border-zinc-200 px-2 py-1 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"

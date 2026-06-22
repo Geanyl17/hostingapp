@@ -11,7 +11,8 @@ export async function cleanupExpiredMedia(): Promise<number> {
   const { data, error } = await admin
     .from("media")
     .select("id, storage_path")
-    .lt("created_at", cutoff);
+    .lt("created_at", cutoff)
+    .eq("featured", false);
 
   if (error || !data || data.length === 0) return 0;
 

@@ -9,13 +9,17 @@ export type MediaItem = {
   created_at: string;
   captured_at: string | null;
   note: string | null;
+  featured: boolean;
 };
+
+const SELECT_FIELDS =
+  "id, original_filename, mime_type, size_bytes, created_at, captured_at, note, featured";
 
 export async function getMediaForUser(userId: string): Promise<MediaItem[]> {
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("media")
-    .select("id, original_filename, mime_type, size_bytes, created_at, captured_at, note")
+    .select(SELECT_FIELDS)
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
@@ -27,10 +31,22 @@ export async function getMediaById(id: string): Promise<MediaItem | null> {
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("media")
-    .select("id, original_filename, mime_type, size_bytes, created_at, captured_at, note")
+    .select(SELECT_FIELDS)
     .eq("id", id)
     .single();
 
   if (error || !data) return null;
+  return data;
+}
+
+export async function getFeaturedMedia(): Promise<MediaItem[]> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("media")
+    .select(SELECT_FIELDS)
+    .eq("featured", true)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
   return data;
 }

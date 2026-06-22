@@ -51,8 +51,10 @@ export async function PATCH(
   }
 
   const body = await request.json();
-  const capturedAt = typeof body.captured_at === "string" ? body.captured_at : null;
-  const note = typeof body.note === "string" ? body.note : null;
+  const updates: Record<string, string | boolean | null> = {};
+  if ("captured_at" in body) updates.captured_at = typeof body.captured_at === "string" ? body.captured_at : null;
+  if ("note" in body) updates.note = typeof body.note === "string" ? body.note : null;
+  if ("featured" in body) updates.featured = Boolean(body.featured);
 
   const admin = createAdminClient();
   const { data, error } = await admin
@@ -67,7 +69,7 @@ export async function PATCH(
 
   const { error: updateError } = await admin
     .from("media")
-    .update({ captured_at: capturedAt, note })
+    .update(updates)
     .eq("id", id);
 
   if (updateError) {
