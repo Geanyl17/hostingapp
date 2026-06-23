@@ -19,7 +19,7 @@ export function DashboardContent({
   collections: Collection[];
 }) {
   const router = useRouter();
-  const [activeFolder, setActiveFolder] = useState<string>(ALL);
+  const [activeFolder, setActiveFolder] = useState<string>(UNSORTED);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [saving, setSaving] = useState(false);
