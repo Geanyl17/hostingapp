@@ -108,7 +108,14 @@ function GalleryCard({ item, collections }: { item: MediaItem; collections: Coll
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
+    <div
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData("text/plain", item.id);
+        e.dataTransfer.effectAllowed = "move";
+      }}
+      className="flex cursor-grab flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-3 active:cursor-grabbing dark:border-zinc-800 dark:bg-zinc-950"
+    >
       <a
         href={pageUrl}
         target="_blank"

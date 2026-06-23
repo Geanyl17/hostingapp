@@ -23,6 +23,16 @@ export function DashboardContent({
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [dragOverTarget, setDragOverTarget] = useState<string | null>(null);
+
+  async function assignToFolder(mediaId: string, collectionId: string | null) {
+    await fetch(`/api/media/${mediaId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ collection_id: collectionId }),
+    });
+    router.refresh();
+  }
 
   const filteredItems = useMemo(() => {
     if (activeFolder === ALL) return items;
@@ -71,8 +81,21 @@ export function DashboardContent({
         </button>
         <button
           onClick={() => setActiveFolder(UNSORTED)}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOverTarget(UNSORTED);
+          }}
+          onDragLeave={() => setDragOverTarget(null)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOverTarget(null);
+            const mediaId = e.dataTransfer.getData("text/plain");
+            if (mediaId) assignToFolder(mediaId, null);
+          }}
           className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
-            activeFolder === UNSORTED
+            dragOverTarget === UNSORTED
+              ? "border-zinc-400 bg-zinc-200 dark:border-zinc-500 dark:bg-zinc-700"
+              : activeFolder === UNSORTED
               ? "border-zinc-950 bg-zinc-950 text-white dark:border-zinc-50 dark:bg-zinc-50 dark:text-zinc-950"
               : "border-zinc-200 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
           }`}
@@ -83,8 +106,21 @@ export function DashboardContent({
           <div key={collection.id} className="group relative">
             <button
               onClick={() => setActiveFolder(collection.id)}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragOverTarget(collection.id);
+              }}
+              onDragLeave={() => setDragOverTarget(null)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragOverTarget(null);
+                const mediaId = e.dataTransfer.getData("text/plain");
+                if (mediaId) assignToFolder(mediaId, collection.id);
+              }}
               className={`rounded-lg border px-3 py-1.5 pr-7 text-sm font-medium transition-colors ${
-                activeFolder === collection.id
+                dragOverTarget === collection.id
+                  ? "border-zinc-400 bg-zinc-200 dark:border-zinc-500 dark:bg-zinc-700"
+                  : activeFolder === collection.id
                   ? "border-zinc-950 bg-zinc-950 text-white dark:border-zinc-50 dark:bg-zinc-50 dark:text-zinc-950"
                   : "border-zinc-200 text-zinc-700 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
               }`}
